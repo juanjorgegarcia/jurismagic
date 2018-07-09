@@ -5,6 +5,9 @@
 
 #key
 /back/justica.pem
+/back/credentials.js
+/back/chavejustica.pem
+/back/justica2.pem
 
 # testing
 /coverage
