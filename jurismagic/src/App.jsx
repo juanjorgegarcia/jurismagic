@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 
 import './App.css';
-import { TextField, Icon, InputAdornment, Button } from '@material-ui/core'
+import { TextField, Icon, InputAdornment, Button, Card } from '@material-ui/core'
+import ResultCard from './components/ResultCard'
+
+const ISLOCAL = false
+const remoteIp = 'http://18.207.30.129'
 
 class App extends Component {
   constructor(props){
@@ -17,12 +21,12 @@ class App extends Component {
     if (this.state.query === '') {
       return false
     }
-    
+
     let params = new URLSearchParams(Object.entries({
       text: this.state.query
     }))
 
-    let res = await fetch('18.207.30.129/q?'+params, {
+    let res = await fetch(ISLOCAL ? 'localhost' : remoteIp + '/q?' + params, {
       method: 'get'
     })
 
@@ -36,9 +40,6 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title"> JurisMagic </h1>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
 
         <TextField
           id="search"
@@ -46,6 +47,8 @@ class App extends Component {
           type="search"
           margin="normal"
           value={this.state.query}
+          fullWidth={true}
+          style={{width: '80%'}}
           onChange={(ev) => {
             this.setState({ query: ev.target.value })
           }}
@@ -64,7 +67,7 @@ class App extends Component {
       </Button>
 
       {this.state.results
-        ? this.state.results.map((r,i) => <p key={'result'+i}> {r.texto_decisao} </p>)
+        ? this.state.results.map((r,i) => <ResultCard key={'result'+i} {...r} />)
         : null
       }
 
