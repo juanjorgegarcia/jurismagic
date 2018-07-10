@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+
 import './App.css';
 import { TextField, Icon, InputAdornment, Button } from '@material-ui/core'
 
@@ -22,7 +22,7 @@ class App extends Component {
       text: this.state.query
     }))
 
-    let res = await fetch('/q?'+params, {
+    let res = await fetch('18.207.30.129/q?'+params, {
       method: 'get'
     })
 
@@ -68,7 +68,7 @@ class App extends Component {
         : null
       }
 
-      {this.state.results instanceof Array && this.state.results.length === 0 ? <p> Não achei nada fera </p> : null} 
+      {this.state.results instanceof Array && this.state.results.length === 0 ? <p> Nenhum documento foi encontrado. </p> : null} 
 
       </div>
     );
