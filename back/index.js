@@ -14,7 +14,8 @@ con.connect()
 
 app.get('/q', function(req, res, next) {
     console.log(req.query.text)
-    const sql = `SELECT * FROM jurisprudencia_2_inst WHERE texto_decisao LIKE '%${req.query.text}%' LIMIT 5`
+    const sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
+    texto_decisao LIKE '%${req.query.text}%' LIMIT 5`
     con.query(sql, function (err, result) {
     if (err) throw err
     res.json(result)
