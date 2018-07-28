@@ -17,4 +17,7 @@ SSH into your amazon instance and **cd** to the back folder, then do **node inde
 You need to run the frontend "jurismagic" in your pc. First, you need to put the aws instance IP in App.jsx on the constant remoteIP. Then do a **npm start** inside jurismagic folder.
 
 
+# Preparing database for TF-IDF ranking
+
+cd into **ranking** and **run updateDB.py** and see the new changes on your mysqlDB 
 

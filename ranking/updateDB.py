@@ -27,7 +27,7 @@ cur.execute("SELECT id,texto_decisao FROM jurisprudencia_2_inst")
 for response in cur:
 
     doc = [response[0],response[1]]
-    print(doc)
+    # print(doc)
     if doc[1]== None:
         doc[1] = " "
     corpus += " "+ doc[1]
@@ -45,7 +45,8 @@ repo.saveVocab()
 sql = "UPDATE jurisprudencia_2_inst SET words = (%s) where id = (%s)"
 for key,value in repo.docs.items():
     cur.execute(sql,(json.dumps(value),key))
-    # print("The database have been updated with tf-idf info")
+
+print("The database have been updated with tf-idf info!")
     
 
 # running = True
