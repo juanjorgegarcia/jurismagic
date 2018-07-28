@@ -1,5 +1,5 @@
 import pymysql
-from SearchEngine.make_repository import *
+from makeRepository import *
 
 conn = pymysql.connect(
     host='localhost',
@@ -9,8 +9,6 @@ conn = pymysql.connect(
     autocommit=True
 )
 cur = conn.cursor()
-cur.execute("SELECT id,texto_decisao FROM jurisprudencia_2_inst")
-
 
 repo = Repository()
 
@@ -21,6 +19,10 @@ try:
     cur.execute( query )
 except:
     print("The column has already been added!")
+
+cur.execute("SELECT id,texto_decisao FROM jurisprudencia_2_inst")
+
+
 
 for response in cur:
 
@@ -38,21 +40,22 @@ repo.processCorpus(corpus)
 repo.makeVocabulary()
 repo.makeDocs()
 repo.computeIDF()
+repo.saveVocab()
 
 sql = "UPDATE jurisprudencia_2_inst SET words = (%s) where id = (%s)"
 for key,value in repo.docs.items():
     cur.execute(sql,(json.dumps(value),key))
-    print("The database have been updated with tf-idf info")
+    # print("The database have been updated with tf-idf info")
     
 
-# ae = True
+# running = True
 
-# while ae:
+# while running:
 #     word = input("insert a query here:  ")
 #     repo.calcTF_IDF(word)
 #     run = input("press 0 to exit and 1 to continue")
 #     if run == "0":
-#         ae = False
+#         running = False
 
 
 
