@@ -42,13 +42,20 @@ repo.makeDocs()
 repo.computeIDF()
 repo.saveVocab()
 
-sql = "UPDATE jurisprudencia_2_inst SET words = (%s) where id = (%s)"
-for key,value in repo.docs.items():
-    cur.execute(sql,(json.dumps(value),key))
+
+cur.execute("CREATE TABLE IF NOT EXISTS vocabulary (termID INT, termFrequency LONGTEXT, docFrequency VARCHAR(255), postingList LONGTEXT, term TEXT)""")
+# cur.execute("SHOW TABLES")
+sql = "INSERT INTO vocabulary (termID, termFrequency, docFrequency, postingList, term) VALUES (%s,%s,%s,%s,%s)"
+for key in repo.vocabulary.keys():
+    val = (key,json.dumps(repo.vocabulary[key]["termFrequency"]),repo.vocabulary[key]["docFrequency"],json.dumps(repo.vocabulary[key]["postingList"]),repo.vocabulary[key]["term"])
+    cur.execute(sql,(val))
 
 print("The database have been updated with tf-idf info!")
     
 
+
+# for x in cur:
+#   print(x)
 # running = True
 
 # while running:

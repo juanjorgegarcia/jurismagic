@@ -73,21 +73,22 @@ class Repository:
 
         Description:
             self.vocabulary: dict with {index: word}
-            self.inv_dict: dict with {word: (index, frequency of word on corpus (IDF))}
+            self.inv_dict: dict with {word: [index, number of times word appears on corpus (IDF)]}
 
         """
-        self.vocabulary = {key:self.list[key] for key in range(len(self.list))}
-        self.inv_dict = {v:[k,1] for (k,v) in self.vocabulary.items()} 
+        
+        self.vocabulary = {key:{"postingList":[],"termFrequency":{},"term":self.list[key],"docFrequency":1} for key in range(len(self.list))}
+        self.inv_dict = {v["term"]:[k,1,[]] for (k,v) in self.vocabulary.items()} 
         
     
     def makeDocs(self):
 
         """
-        Saves info of the words in texto_decisao
+        Saves info of the words on texto_decisao
 
         Description:
             self.docs: dict with {id: [(wordID, wordFrequency(TF) )]}
-            self.inv_dict: dict with {word: (index, frequency of word on corpus (IDF))}
+            self.inv_dict: dict with {word: [wordID, number of times word appears on corpus (IDF)]}
 
         """
 
@@ -101,9 +102,14 @@ class Repository:
                 wordlist[self.inv_dict[word][0]] = (value.count(word)/len(wordsInDoc))
                 # wordlist.append((self.inv_dict[word][0],(value.count(word)/len(wordsInDoc))))
                 self.inv_dict[word][1]+=1
+                self.inv_dict[word][2].append(key)
+                self.vocabulary[self.inv_dict[word][0]]["postingList"].append(key)
+                self.vocabulary[self.inv_dict[word][0]]["docFrequency"] +=1
+                self.vocabulary[self.inv_dict[word][0]]["termFrequency"][key] = (value.count(word)/len(wordsInDoc))
                 # docList.append((key,value.count(word)))
             # self.index[self.inv_dict[word]] = docList
             self.docs[key] = wordlist
+        # print(self.vocabulary)
         
 
     # def makeIndex(self):
@@ -130,8 +136,13 @@ class Repository:
             self.inv_dict: dict with {word: (index, frequency of word on corpus (IDF))}
 
         """
-        self.inv_dict = {word:(value[0],log1p(value[1]/len(self.docs))) for word,value in self.inv_dict.items()}
-            
+        self.inv_dict = {word:(value[0],log1p(len(self.docs)/value[1])) for word,value in self.inv_dict.items()}
+        
+        # self.vocabulary = {word:(value[0],log1p(value["wordFrequency"]/len(self.docs))) for word,value in self.inv_dict.items()}
+        for wordID,value in self.vocabulary.items():
+            self.vocabulary[wordID]["docFrequency"] = log1p(len(self.docs)/value["docFrequency"])
+
+
     # def serializeDocs(self):
     #     return json.dumps(self.docs)
 
