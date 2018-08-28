@@ -10,6 +10,7 @@ let con = mysql.createConnection({
   database : 'jurisprudencia_2_inst'
 })
 
+
 con.connect()
 
 app.get('/q', function(req, res, next) {
@@ -20,6 +21,8 @@ app.get('/q', function(req, res, next) {
     if (err) throw err
     res.json(result)
     })
+
+
 })
 
 app.listen(port, 'localhost', () => {

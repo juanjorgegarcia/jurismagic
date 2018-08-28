@@ -4,7 +4,7 @@ import './App.css';
 import { TextField, Icon, InputAdornment, Button, Card } from '@material-ui/core'
 import ResultCard from './components/ResultCard'
 
-const ISLOCAL = false
+const ISLOCAL = true
 const remoteIp = 'http://18.207.30.129'
 
 class App extends Component {
@@ -25,12 +25,15 @@ class App extends Component {
     let params = new URLSearchParams(Object.entries({
       text: this.state.query
     }))
-
-    let res = await fetch(ISLOCAL ? 'localhost' : remoteIp + '/q?' + params, {
+    
+    let url = ISLOCAL ? `q?${params}` : `${remoteIp}/q?${params}`
+    console.log(url)
+    let res = await fetch(url, {
       method: 'get'
     })
 
     res = await res.json()
+    console.log(res)
     this.setState({ results: res })
   }
 
@@ -65,14 +68,14 @@ class App extends Component {
         Pesquisar
         <Icon style={{marginLeft: 5}}>send</Icon>
       </Button>
+      {this.state.results && this.state.query!= "" ? <p>Foram encontrados {this.state.results.length} documentos </p>: null}
 
       {this.state.results
         ? this.state.results.map((r,i) => <ResultCard key={'result'+i} {...r} />)
         : null
       }
-
       {this.state.results instanceof Array && this.state.results.length === 0 ? <p> Nenhum documento foi encontrado. </p> : null} 
-
+      
       </div>
     );
   }
