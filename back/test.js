@@ -2,11 +2,12 @@ const express = require('express')
 const app = express()
 const mysql = require('mysql')
 const port = 5000
+const credentials = require('./credentials')
 
 let con = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "",
+  user: credentials.user,
+  password: credentials.pass,
   database : 'jurisprudencia_2_inst'
 })
 
@@ -14,7 +15,7 @@ let con = mysql.createConnection({
 async function resolveQuery(query) {
     return new Promise((resolve, reject) => {
         const { spawn } = require('child_process');
-        const pyprog = spawn('python3', ['./../ranking/search.py',query]);
+        const pyprog = spawn('python3', ['./../ranking/search.py',query,credentials.user,credentials.pass]);
 
         pyprog.stdout.on('data', (data) => {
             let parsedData = JSON.parse(data)

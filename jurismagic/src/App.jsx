@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 
 import './App.css';
-import { TextField, Icon, InputAdornment, Button, Card } from '@material-ui/core'
+import { TextField, Icon, InputAdornment, Button} from '@material-ui/core'
 import ResultCard from './components/ResultCard'
 
 const ISLOCAL = true
 const remoteIp = 'http://18.207.30.129'
 
 class App extends Component {
-  constructor(props){
+  constructor(props) {
     super(props)
     this.state = {
       query: "",
@@ -16,7 +16,7 @@ class App extends Component {
     }
   }
 
-  
+
   onQuerySubmit = async () => {
     if (this.state.query === '') {
       return false
@@ -25,7 +25,7 @@ class App extends Component {
     let params = new URLSearchParams(Object.entries({
       text: this.state.query
     }))
-    
+
     let url = ISLOCAL ? `q?${params}` : `${remoteIp}/q?${params}`
     console.log(url)
     let res = await fetch(url, {
@@ -51,7 +51,7 @@ class App extends Component {
           margin="normal"
           value={this.state.query}
           fullWidth={true}
-          style={{width: '80%'}}
+          style={{ width: '80%' }}
           onChange={(ev) => {
             this.setState({ query: ev.target.value })
           }}
@@ -63,19 +63,19 @@ class App extends Component {
             ),
           }}
         />
-      <br/>
-      <Button variant="contained" color="primary" onClick={this.onQuerySubmit}>
-        Pesquisar
-        <Icon style={{marginLeft: 5}}>send</Icon>
-      </Button>
-      {this.state.results && this.state.query!= "" ? <p>Foram encontrados {this.state.results.length} documentos </p>: null}
+        <br />
+        <Button variant="contained" color="primary" onClick={this.onQuerySubmit}>
+          Pesquisar
+        <Icon style={{ marginLeft: 5 }}>send</Icon>
+        </Button>
+        {this.state.results && this.state.query !== "" ? <p>Foram encontrados {this.state.results.length} documentos </p> : null}
 
-      {this.state.results
-        ? this.state.results.map((r,i) => <ResultCard key={'result'+i} {...r} />)
-        : null
-      }
-      {this.state.results instanceof Array && this.state.results.length === 0 ? <p> Nenhum documento foi encontrado. </p> : null} 
-      
+        {this.state.results
+          ? this.state.results.map((r, i) => <ResultCard key={'result' + i} {...r} />)
+          : null
+        }
+        {this.state.results instanceof Array && this.state.results.length === 0 ? <p> Nenhum documento foi encontrado. </p> : null}
+
       </div>
     );
   }
