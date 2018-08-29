@@ -32,10 +32,13 @@ class Repository:
             self.list: alphabetic list of all unique words in corpus
 
         """
+        print("Processing Corpus...")
         reg = re.sub(r'[^ \s \d \w]', "", corpus.lower())
         self.corpus = reg
         corpus_splitted = reg.split()
         self.list = sorted(list(set(corpus_splitted)))
+        print("Processing Corpus: Done!")
+
 
     def processDoc(self, doc):
         """
@@ -74,11 +77,13 @@ class Repository:
             self.inv_dict: dict with {word: [index, number of times word appears on corpus (IDF)]}
 
         """
+        print("Making Vocabulary...")
 
         self.vocabulary = {key: {"postingList": [], "termFrequency": {
         }, "term": self.list[key], "docFrequency": 1} for key in range(len(self.list))}
         self.inv_dict = {v["term"]: [k, 1, []]
                          for (k, v) in self.vocabulary.items()}
+        print("Vocabulary: Done!")
 
     def makeDocs(self):
         """
@@ -89,7 +94,7 @@ class Repository:
             self.inv_dict: dict with {word: [wordID, number of times word appears on corpus (IDF)]}
 
         """
-
+        print("Making docs...")
         self.docs = {}
         # print(self.inv_dict)
         for (key, value) in self.processedDoc.items():
@@ -111,6 +116,7 @@ class Repository:
             # self.index[self.inv_dict[word]] = docList
             self.docs[key] = wordlist
         # print(self.vocabulary)
+        print("Docs: Done!")
 
     # def makeIndex(self):
 
@@ -135,6 +141,7 @@ class Repository:
             self.inv_dict: dict with {word: (index, frequency of word on corpus (IDF))}
 
         """
+        print("Computing IDF...")
         self.inv_dict = {word: (value[0], log1p(len(self.docs)/value[1]))
                          for word, value in self.inv_dict.items()}
 
@@ -142,7 +149,7 @@ class Repository:
         for wordID, value in self.vocabulary.items():
             self.vocabulary[wordID]["docFrequency"] = log1p(
                 len(self.docs)/value["docFrequency"])
-
+        print("Computing IDF: Done")
     # def serializeDocs(self):
     #     return json.dumps(self.docs)
 
@@ -159,6 +166,7 @@ class Repository:
             self.inv_dict: dict with {word: (index, frequency of word on corpus (IDF))}
 
         """
+        print("Computing IDF")
         wordsOnQuery = query.split()
 
         ranking = []
@@ -174,7 +182,8 @@ class Repository:
                 except:
                     tfidf += 0
             ranking.append((docID, tfidf))
-        print(sorted(ranking))
+        # print(sorted(ranking))
+        print("Computing IDF: Done!")
 
     def saveVocab(self, make=False):
         """

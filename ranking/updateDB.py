@@ -9,6 +9,7 @@ conn = pymysql.connect(
     db='jurisprudencia_2_inst',
     autocommit=True
 )
+
 cur = conn.cursor()
 repo = Repository()
 
