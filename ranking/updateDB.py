@@ -10,7 +10,7 @@ conn = pymysql.connect(
     autocommit=True
 )
 
-cur = conn.cursor()
+cur = conn.cursor(pymysql.cursors.SSCursor)
 repo = Repository()
 
 corpus = ""

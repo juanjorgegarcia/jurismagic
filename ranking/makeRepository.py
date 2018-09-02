@@ -107,8 +107,8 @@ class Repository:
                 # wordlist.append((self.inv_dict[word][0],(value.count(word)/len(wordsInDoc))))
                 self.inv_dict[word][1] += 1
                 self.inv_dict[word][2].append(key)
-                self.vocabulary[self.inv_dict[word]
-                                [0]]["postingList"].append(key)
+                if key not in self.vocabulary[self.inv_dict[word][0]]["postingList"]:
+                    self.vocabulary[self.inv_dict[word][0]]["postingList"].append(key)
                 self.vocabulary[self.inv_dict[word][0]]["docFrequency"] += 1
                 self.vocabulary[self.inv_dict[word][0]]["termFrequency"][key] = (
                     value.count(word)/len(wordsInDoc))
