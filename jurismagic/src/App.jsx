@@ -12,7 +12,9 @@ class App extends Component {
     super(props)
     this.state = {
       query: "",
-      results: null
+      results: null,
+      docsSize: null,
+      download: false
     }
   }
 
@@ -27,14 +29,69 @@ class App extends Component {
     }))
 
     let url = ISLOCAL ? `q?${params}` : `${remoteIp}/q?${params}`
+
+    console.log(url)
+
+    let res = await fetch(url, {
+      method: 'get'
+    })
+
+    let urlSize = ISLOCAL ? `count?${params}` : `${remoteIp}/count?${params}`
+
+    let resCount = await fetch(urlSize, {
+      method: 'get'
+    })
+    
+    resCount = await resCount.json()
+
+    res = await res.json()
+    // console.log(res)
+    this.setState({results:res ,docsSize : resCount[0][["count(id)"]]})
+    
+
+  }
+
+
+  // countDocs = async () => {
+  //   if (this.state.query === '') {
+  //     return false
+  //   }
+
+  //   let params = new URLSearchParams(Object.entries({
+  //     text: this.state.query
+  //   }))
+
+  //   let url = ISLOCAL ? `download?${params}` : `${remoteIp}/download?${params}`
+  //   console.log(url)
+  //   let res = await fetch(url, {
+  //     method: 'get'
+  //   })
+
+  //   res = await res.json()
+  //   console.log(res)
+  //   this.setState({ results: res })
+  // }
+
+
+  
+  onDownload = async () => {
+    if (this.state.query === '') {
+      return false
+    }
+
+    let params = new URLSearchParams(Object.entries({
+      text: this.state.query
+    }))
+
+    let url = ISLOCAL ? `download?${params}` : `${remoteIp}/download?${params}`
     console.log(url)
     let res = await fetch(url, {
       method: 'get'
     })
 
-    res = await res.json()
-    console.log(res)
-    this.setState({ results: res })
+    this.setState({download:true})
+
+    
   }
 
   render() {
@@ -68,7 +125,12 @@ class App extends Component {
           Pesquisar
         <Icon style={{ marginLeft: 5 }}>send</Icon>
         </Button>
-        {this.state.results && this.state.query !== "" ? <p>Foram encontrados {this.state.results.length} documentos </p> : null}
+        <Button className = "Download-Button" style={{ marginLeft: "2%" }}variant="contained" color="primary" onClick={this.onDownload}>
+          download
+        <Icon style={{ marginLeft: 5 }} >archive</Icon>
+        </Button>
+        {this.state.docsSize && this.state.results && this.state.query !== "" ? <p>Foram encontrados {this.state.docsSize} documentos </p> : null}
+        {this.state.download ? <a href={this.state.query+'.zip'}download={this.state.query+'.zip'}>Click to Download </a> : null}
 
         {this.state.results
           ? this.state.results.map((r, i) => <ResultCard key={'result' + i} {...r} />)
