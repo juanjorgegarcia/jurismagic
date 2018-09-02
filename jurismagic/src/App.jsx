@@ -36,21 +36,43 @@ class App extends Component {
       method: 'get'
     })
 
-    let urlSize = ISLOCAL ? `count?${params}` : `${remoteIp}/count?${params}`
+    // let urlSize = ISLOCAL ? `count?${params}` : `${remoteIp}/count?${params}`
 
+    // let resCount = await fetch(urlSize, {
+    //   method: 'get'
+    // })
+    
+    // resCount = await resCount.json()
+
+    res = await res.json()
+    // console.log(resCount)
+    this.setState({results:res })
+    this.getRowCount()
+  }
+  getRowCount = async () => {
+    if (this.state.query === '') {
+      return false
+    }
+
+    let params = new URLSearchParams(Object.entries({
+      text: this.state.query
+    }))
+
+    
+
+    let urlSize = ISLOCAL ? `count?${params}` : `${remoteIp}/count?${params}`
+    // console.log(urlSize)
     let resCount = await fetch(urlSize, {
       method: 'get'
     })
     
     resCount = await resCount.json()
 
-    res = await res.json()
-    // console.log(res)
-    this.setState({results:res ,docsSize : resCount[0][["count(id)"]]})
+  
+    // console.log(resCount)
+    this.setState({docsSize : resCount[0][["@rows"]]})
     
-
   }
-
 
   // countDocs = async () => {
   //   if (this.state.query === '') {

@@ -24,12 +24,18 @@ con.connect()
 
 app.get('/q', function (req, res, next) {
     console.log(req.query.text)
-    const sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
+    const sql = `SELECT SQL_CALC_FOUND_ROWS  * FROM jurisprudencia_2_inst WHERE 
     texto_decisao LIKE '%${req.query.text}%' LIMIT 5`
-
+    
     con.query(sql, function (err, result) {
         if (err) throw err
         res.json(result)
+    })
+    
+    con.query(`SET @rows = FOUND_ROWS()`, function (err, result) {
+        if (err) throw err
+        res.end()
+        // console.log(result)
     })
 
 
@@ -39,12 +45,13 @@ app.get('/q', function (req, res, next) {
 app.get('/count', function (req, res, next) {
     console.log(req.query.text)
 
-    const sql = `SELECT count(id) FROM jurisprudencia_2_inst WHERE 
-    texto_decisao LIKE '%${req.query.text}%' `
+    const sql = `SELECT @rows `
 
     con.query(sql, function (err, result) {
         if (err) throw err
         res.json(result)
+        // res.end()
+        // console.log(result)
 
     })
 
