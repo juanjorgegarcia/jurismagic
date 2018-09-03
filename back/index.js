@@ -7,41 +7,19 @@ const fs = require("fs")
 const child_process = require("child_process");
 const path = require('path')
 const json2csv = require('json2csv').parse;
+// const serveIndex = require('serve-index');
 
 
-// app.use('/static', express.static(__dirname + '/public'));
-// app.use(express.static(path.join(__dirname, 'public/')));
 app.use(express.static(path.join(__dirname, '/front/build')));
 app.use(express.static(path.join(__dirname, '/public')));
+// app.use(express.directory(path.join(__dirname + '/data'));
+// app.use('/d', serveIndex(path.join(__dirname + '/data'),{icons: true}));
 
-// app.use(express.static(path.join(__dirname, './data')));
-// app.use('/data', express.static('data'));
+
 app.use('/data', express.static(path.join(__dirname + '/data')));
 console.log(path.join(__dirname + '/data'))
-// app.get('/oi', function(req, res) {
-//     console.log(path.join(__dirname, 'public/', 'noiva.csv'))
-//     res.sendFile(path.join(__dirname, 'public/', 'noiva.csv'));
-//   });
+
 console.log(path.join(__dirname, 'public/'))
-// const start = async () => {
-
-//     await server.register(require('inert'));
-
-//     server.route({
-//         method: 'GET',
-//         path: '/picture.jpg',
-//         handler: function (request, h) {
-
-//             return h.file('/path/to/picture.jpg');
-//         }
-//     });
-
-//     await server.start();
-
-//     console.log('Server running at:', server.info.uri);
-// };
-
-// start();
 
 
 let con = mysql.createConnection({
@@ -96,7 +74,7 @@ app.get('/download', function (req, res, next) {
     console.log(req.query.text)
     const sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
     texto_decisao LIKE '%${req.query.text}%'`
-
+    res.send("Request chegou")
     let query = con.query(sql)
     query.on('error', function (err) {
             // Handle error, an 'end' event will be emitted after this as well
@@ -106,21 +84,24 @@ app.get('/download', function (req, res, next) {
         })
         .on('result', function (row) {
             // Pausing the connnection is useful if your processing involves I/O
-            console.log("entrou no result")
+            
+            // console.log("entrou no result")
             con.pause();
 
             const newLine = "\r\n";
 
             let fields = ['id', 'tribunal', "numero", "assunto", "classe", "data_decisao",
                 "orgao_julgador", "julgador", "texto_decisao", "relatorio", "fundamentacao", "dispositivo",
-                "polo_ativo", "polo_passivo", "origem", "classificacao", "classificacao_auto", "words"
+                "polo_ativo", "polo_passivo", "origem", "classificacao", "classificacao_auto"
             ];
-
-            let rowJSON = JSON.stringify
+            console.log(row)
+            let string = JSON.stringify(row)
+            let rowJSON = JSON.parse(string)
+            console.log(rowJSON)
 
             let toCsv = {
                 data: rowJSON,
-                fields: fields,
+                fields: fields
             };
 
             fs.stat(`./data/${req.query.text}.csv`, function (err, stat) {
@@ -161,7 +142,9 @@ app.get('/download', function (req, res, next) {
             spawn = require('child_process').spawn;
             zip = spawn('zip',['-X' , `./data/${req.query.text}.zip`, `./data/${req.query.text}.csv`]);
             zip .on('exit', function(code) {
-                res.end()
+                console.log("The file has been zipped")
+                // res.sendFile(path.join(__dirname + `/data/${req.query.text}.zip`))
+                
             });
 
         });
