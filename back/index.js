@@ -5,11 +5,43 @@ const port = 5000
 const credentials = require('./credentials')
 const fs = require("fs")
 const child_process = require("child_process");
-
+const path = require('path')
 const json2csv = require('json2csv').parse;
 
 
-// app.use(express.static(path.join('public')));
+// app.use('/static', express.static(__dirname + '/public'));
+// app.use(express.static(path.join(__dirname, 'public/')));
+app.use(express.static(path.join(__dirname, '/front/build')));
+app.use(express.static(path.join(__dirname, '/public')));
+
+// app.use(express.static(path.join(__dirname, './data')));
+// app.use('/data', express.static('data'));
+app.use('/data', express.static(path.join(__dirname + '/data')));
+console.log(path.join(__dirname + '/data'))
+// app.get('/oi', function(req, res) {
+//     console.log(path.join(__dirname, 'public/', 'noiva.csv'))
+//     res.sendFile(path.join(__dirname, 'public/', 'noiva.csv'));
+//   });
+console.log(path.join(__dirname, 'public/'))
+// const start = async () => {
+
+//     await server.register(require('inert'));
+
+//     server.route({
+//         method: 'GET',
+//         path: '/picture.jpg',
+//         handler: function (request, h) {
+
+//             return h.file('/path/to/picture.jpg');
+//         }
+//     });
+
+//     await server.start();
+
+//     console.log('Server running at:', server.info.uri);
+// };
+
+// start();
 
 
 let con = mysql.createConnection({
@@ -23,6 +55,7 @@ let con = mysql.createConnection({
 con.connect()
 
 app.get('/q', function (req, res, next) {
+    // req.setTimeout(0) // no timeout
     console.log(req.query.text)
     const sql = `SELECT SQL_CALC_FOUND_ROWS  * FROM jurisprudencia_2_inst WHERE 
     texto_decisao LIKE '%${req.query.text}%' LIMIT 5`
@@ -126,7 +159,7 @@ app.get('/download', function (req, res, next) {
         .on('end', function () {
             // all rows have been received
             spawn = require('child_process').spawn;
-            zip = spawn('zip',['-X' , `./../jurismagic/public/${req.query.text}.zip`, `./data/${req.query.text}.csv`]);
+            zip = spawn('zip',['-X' , `./data/${req.query.text}.zip`, `./data/${req.query.text}.csv`]);
             zip .on('exit', function(code) {
                 res.end()
             });
