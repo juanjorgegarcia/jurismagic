@@ -16,8 +16,17 @@ const io = socketIo(server)
 
 app.use(express.static(path.join(__dirname, '/front/build')));
 app.use(express.static(path.join(__dirname, '/public')));
-
-
+io.emit("alo", "socket funfou")
+io.on('connection', function (socket) {
+    io.emit('news','user connected');
+      console.log('çonectou');
+    
+  });
+// var socket = io.connect();
+// console.log('check 1', socket.connected);
+// socket.on('connect', function() {
+//   console.log('check 2', socket.connected);
+// });
 app.use('/data', express.static(path.join(__dirname + '/data')));
 console.log(path.join(__dirname + '/data'))
 
