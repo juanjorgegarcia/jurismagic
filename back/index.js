@@ -2,18 +2,20 @@ const express = require('express')
 const app = express()
 const mysql = require('mysql')
 const port = 5000
+var http = require('http')
+var socketIo = require('socket.io');
 const credentials = require('./credentials')
 const fs = require("fs")
-const child_process = require("child_process");
+// const child_process = require("child_process");
 const path = require('path')
 const json2csv = require('json2csv').parse;
 // const serveIndex = require('serve-index');
 
+const server = http.createServer(app)
+const io = socketIo(server)
 
 app.use(express.static(path.join(__dirname, '/front/build')));
 app.use(express.static(path.join(__dirname, '/public')));
-// app.use(express.directory(path.join(__dirname + '/data'));
-// app.use('/d', serveIndex(path.join(__dirname + '/data'),{icons: true}));
 
 
 app.use('/data', express.static(path.join(__dirname + '/data')));
@@ -29,7 +31,6 @@ let con = mysql.createConnection({
     database: 'jurisprudencia_2_inst'
 })
 
-
 con.connect()
 
 app.get('/q', function (req, res, next) {
@@ -41,6 +42,7 @@ app.get('/q', function (req, res, next) {
     con.query(sql, function (err, result) {
         if (err) throw err
         res.json(result)
+        
     })
     
     con.query(`SET @rows = FOUND_ROWS()`, function (err, result) {
@@ -60,9 +62,10 @@ app.get('/count', function (req, res, next) {
 
     con.query(sql, function (err, result) {
         if (err) throw err
-        res.json(result)
-        // res.end()
-        // console.log(result)
+        // res.json(result)
+        // io.emit("comecou","alo galera")
+        io.emit("count", result)
+
 
     })
 
@@ -94,10 +97,10 @@ app.get('/download', function (req, res, next) {
                 "orgao_julgador", "julgador", "texto_decisao", "relatorio", "fundamentacao", "dispositivo",
                 "polo_ativo", "polo_passivo", "origem", "classificacao", "classificacao_auto"
             ];
-            console.log(row)
+            // console.log(row)
             let string = JSON.stringify(row)
             let rowJSON = JSON.parse(string)
-            console.log(rowJSON)
+            // console.log(rowJSON)
 
             let toCsv = {
                 data: rowJSON,
@@ -141,18 +144,22 @@ app.get('/download', function (req, res, next) {
             // all rows have been received
             spawn = require('child_process').spawn;
             zip = spawn('zip',['-X' , `./data/${req.query.text}.zip`, `./data/${req.query.text}.csv`]);
-            zip .on('exit', function(code) {
+            zip.on('exit', function(code) {
                 console.log("The file has been zipped")
                 // res.sendFile(path.join(__dirname + `/data/${req.query.text}.zip`))
-                
+                io.emit("download", true)
+                console.log(code)
             });
-
+            
         });
 
 })
 
-app.listen(port, 'localhost', () => {
-    console.log(`server started @ localhost:${port}`)
-})
+// app.listen(port, 'localhost', () => {
+//     console.log(`server started @ localhost:${port}`)
+// })
+
+server.listen(port, () => console.log(`Listening on port ${port}`))
+
 
 // module.exports = app;
