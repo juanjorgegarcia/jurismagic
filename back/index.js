@@ -16,12 +16,12 @@ const io = socketIo(server)
 
 app.use(express.static(path.join(__dirname, '/front/build')));
 app.use(express.static(path.join(__dirname, '/public')));
-io.emit("alo", "socket funfou")
 io.on('connection', function (socket) {
     io.emit('news','user connected');
-      console.log('çonectou');
+    console.log('çonectou');
     
   });
+  
 // var socket = io.connect();
 // console.log('check 1', socket.connected);
 // socket.on('connect', function() {
@@ -45,20 +45,26 @@ con.connect()
 app.get('/q', function (req, res, next) {
     // req.setTimeout(0) // no timeout
     console.log(req.query.text)
-    const sql = `SELECT SQL_CALC_FOUND_ROWS  * FROM jurisprudencia_2_inst WHERE 
+    const sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
     texto_decisao LIKE '%${req.query.text}%' LIMIT 5`
     
+
     con.query(sql, function (err, result) {
         if (err) throw err
-        res.json(result)
-        
+        // res.json(result)
+
+        io.emit("preview", result)
+
+
+        console.log('First 5 docs Found!')
     })
     
-    con.query(`SET @rows = FOUND_ROWS()`, function (err, result) {
-        if (err) throw err
-        res.end()
-        // console.log(result)
-    })
+    // con.query(`SET @rows = FOUND_ROWS()`, function (err, result) {
+    //     if (err) throw err
+    //     res.end()
+    //     // console.log(result)
+    //     console.log(`All docs within the query found: ${result} docs!`)
+    // })
 
 
 })
@@ -67,13 +73,15 @@ app.get('/q', function (req, res, next) {
 app.get('/count', function (req, res, next) {
     console.log(req.query.text)
 
-    const sql = `SELECT @rows `
-
+    // const sql = `SELECT @rows `
+    const sql = `SELECT count(id) FROM jurisprudencia_2_inst WHERE 
+    texto_decisao LIKE '%${req.query.text}%'`
+    
     con.query(sql, function (err, result) {
         if (err) throw err
         // res.json(result)
-        // io.emit("comecou","alo galera")
         io.emit("count", result)
+        console.log(`${result[0]['count(id)']} docs found!`)
 
 
     })
