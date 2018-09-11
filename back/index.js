@@ -52,9 +52,7 @@ app.get('/q', function (req, res, next) {
     con.query(sql, function (err, result) {
         if (err) throw err
         // res.json(result)
-
         io.emit("preview", result)
-
 
         console.log('First 5 docs Found!')
     })
