@@ -79,7 +79,7 @@ app.get('/killQuery', function (req, res, next) {
             })
             
             con.connect()
-            con.query("KILL QUERY" + oldConID, function(err) {
+            con.query("KILL QUERY " + oldConID, function(err) {
                 if (err) throw err;
                 console.log("I have interrupted the executing query for a new request");
                 io.emit("count", null)
@@ -116,10 +116,16 @@ app.get('/count', function (req, res, next) {
     sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
     
     con.query(sql, function (err, result) {
-        if (err) throw err
+        if (err) {
+            console.log('Query Cancelada')
+            io.emit("count", null)
+        }
         // res.json(result)
-        io.emit("count", result)
-        console.log(`${result[0]['count(id)']} docs found!`)
+        if (result){
+            io.emit("count", result)
+            console.log(`${result[0]['count(id)']} docs found!`)
+        }
+
 
 
     })
