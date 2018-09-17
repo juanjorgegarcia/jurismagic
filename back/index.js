@@ -68,11 +68,13 @@ app.get('/killQuery', function (req, res, next) {
     // req.setTimeout(0) // no timeout
     console.log(con.threadId)
     console.log(req.query.killQuery)
-    if (req.query.killQuery && req.query.counting && req.query.buildingArchives == 1){
+    if (req.query.killQuery && (req.query.counting || req.query.buildingArchives == 1)){
         try {
             con.query("KILL QUERY" + con.threadId, function(err) {
                 if (err) throw err;
                 console.log("I have interrupted the executing query for a new request");
+                io.emit("count", "Pesquisa Cancelada!")
+
             }); 
         } catch (error) {
             console.log('There is no query')
@@ -82,6 +84,7 @@ app.get('/killQuery', function (req, res, next) {
     }
     else{
         console.log('There is no query')
+
     }
 
 })
