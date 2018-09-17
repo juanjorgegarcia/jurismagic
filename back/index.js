@@ -1,18 +1,18 @@
-const express = require('express')
-const app = express()
-const mysql = require('mysql')
-const port = 5000
+let express = require('express')
+let app = express()
+let mysql = require('mysql')
+let port = 5000
 var http = require('http')
 var socketIo = require('socket.io');
-const credentials = require('./credentials')
-const fs = require("fs")
-// const child_process = require("child_process");
-const path = require('path')
-const json2csv = require('json2csv').parse;
-// const serveIndex = require('serve-index');
+let credentials = require('./credentials')
+let fs = require("fs")
+// let child_process = require("child_process");
+let path = require('path')
+let json2csv = require('json2csv').parse;
+// let serveIndex = require('serve-index');
 
-const server = http.createServer(app)
-const io = socketIo(server)
+let server = http.createServer(app)
+let io = socketIo(server)
 
 app.use(express.static(path.join(__dirname, '/front/build')));
 app.use(express.static(path.join(__dirname, '/public')));
@@ -44,11 +44,17 @@ con.connect()
 
 app.get('/q', function (req, res, next) {
     // req.setTimeout(0) // no timeout
+    console.log(con.threadId)
     console.log(req.query.text)
-    const sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
-    texto_decisao LIKE '%${req.query.text}%' LIMIT 5`
-    
+    splitedQuery = req.query.text.split(" ")
 
+    let sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
+     `
+    splitedQuery.forEach(element => {
+        sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
+    });
+    sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
+    
     con.query(sql, function (err, result) {
         if (err) throw err
         // res.json(result)
@@ -56,24 +62,43 @@ app.get('/q', function (req, res, next) {
 
         console.log('First 5 docs Found!')
     })
-    
-    // con.query(`SET @rows = FOUND_ROWS()`, function (err, result) {
-    //     if (err) throw err
-    //     res.end()
-    //     // console.log(result)
-    //     console.log(`All docs within the query found: ${result} docs!`)
-    // })
 
+})
+app.get('/killQuery', function (req, res, next) {
+    // req.setTimeout(0) // no timeout
+    console.log(con.threadId)
+    console.log(req.query.killQuery)
+    if (req.query.killQuery && req.query.counting && req.query.buildingArchives == 1){
+        try {
+            con.query("KILL QUERY" + con.threadId, function(err) {
+                if (err) throw err;
+                console.log("I have interrupted the executing query for a new request");
+            }); 
+        } catch (error) {
+            console.log('There is no query')
+        
+        }
+
+    }
+    else{
+        console.log('There is no query')
+    }
 
 })
 
 
+
 app.get('/count', function (req, res, next) {
     console.log(req.query.text)
+    let splitedQuery = req.query.text.split(" ")
 
-    // const sql = `SELECT @rows `
-    const sql = `SELECT count(id) FROM jurisprudencia_2_inst WHERE 
-    texto_decisao LIKE '%${req.query.text}%'`
+
+    let sql = `SELECT count(id) FROM jurisprudencia_2_inst WHERE `
+    
+    splitedQuery.forEach(element => {
+        sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
+    });
+    sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
     
     con.query(sql, function (err, result) {
         if (err) throw err
@@ -90,8 +115,21 @@ app.get('/count', function (req, res, next) {
 
 app.get('/download', function (req, res, next) {
     console.log(req.query.text)
-    const sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
-    texto_decisao LIKE '%${req.query.text}%'`
+    let sql = `SELECT * FROM jurisprudencia_2_inst WHERE `
+    let splitedQuery = req.query.text.split(" ")    
+    splitedQuery.forEach(element => {
+        sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
+    });
+    sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
+    
+
+    let filename = ''
+    splitedQuery.forEach(element => {
+        filename = filename + element +"_"
+    });
+    filename = filename.substring(0,filename.length-1)
+    console.log(filename)
+
     res.send("Request chegou")
     let query = con.query(sql)
     query.on('error', function (err) {
@@ -106,7 +144,7 @@ app.get('/download', function (req, res, next) {
             // console.log("entrou no result")
             con.pause();
 
-            const newLine = "\r\n";
+            let newLine = "\r\n";
 
             let fields = ['id', 'tribunal', "numero", "assunto", "classe", "data_decisao",
                 "orgao_julgador", "julgador", "texto_decisao", "relatorio", "fundamentacao", "dispositivo",
@@ -122,14 +160,14 @@ app.get('/download', function (req, res, next) {
                 fields: fields
             };
 
-            fs.stat(`./data/${req.query.text}.csv`, function (err, stat) {
+            fs.stat(`./data/${filename}.csv`, function (err, stat) {
                 if (err == null) {
                     console.log('File exists');
 
                     //write the actual data and end with newline
                     var csv = json2csv(toCsv) + newLine;
 
-                    fs.appendFile(`./data/${req.query.text}.csv`, csv, function (err) {
+                    fs.appendFile(`./data/${filename}.csv`, csv, function (err) {
                         if (err) throw err;
                         console.log('The "data to append" was appended to file!');
                     });
@@ -138,14 +176,14 @@ app.get('/download', function (req, res, next) {
                     console.log('New file, just writing headers');
                     fields = (fields + newLine);
 
-                    fs.writeFile(`./data/${req.query.text}.csv`, fields, function (err, stat) {
+                    fs.writeFile(`./data/${filename}.csv`, fields, function (err, stat) {
                         if (err) throw err;
                         console.log('file saved');
                     });
                     //write the actual data and end with newline
                     let csv = json2csv(toCsv) + newLine;
 
-                    fs.appendFile(`./data/${req.query.text}.csv`, csv, function (err) {
+                    fs.appendFile(`./data/${filename}.csv`, csv, function (err) {
                         if (err) throw err;
                         console.log('The "data to append" was appended to file!');
                     });
@@ -158,7 +196,7 @@ app.get('/download', function (req, res, next) {
         .on('end', function () {
             // all rows have been received
             spawn = require('child_process').spawn;
-            zip = spawn('zip',['-X' , `./data/${req.query.text}.zip`, `./data/${req.query.text}.csv`]);
+            zip = spawn('zip',['-X' , `./data/${filename}.zip`, `./data/${filename}.csv`]);
             zip.on('exit', function(code) {
                 console.log("The file has been zipped")
                 // res.sendFile(path.join(__dirname + `/data/${req.query.text}.zip`))
