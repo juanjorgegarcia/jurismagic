@@ -8,7 +8,7 @@ let credentials = require('./credentials')
 let fs = require("fs")
 // let child_process = require("child_process");
 let path = require('path')
-let json2csv = require('json2csv').parse;
+const Json2csvParser = require('json2csv').Parser;
 // let serveIndex = require('serve-index');
 
 let server = http.createServer(app)
@@ -35,94 +35,7 @@ io.on('connection', function (socket) {
     })
     
     con.connect()
-    // socket.on('/q', (data) => {
-    //     console.log(`ClientID:${socket.id}, msg:${data}`)
 
-    //     console.log(JSON.stringify(data))
-    //     splitedQuery = data.split(" ")
-    
-    //     let sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
-    //      `
-    //     splitedQuery.forEach(element => {
-    //         sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
-    //     });
-    //     sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
-        
-    //     con.query(sql, function (err, result) {
-    //         if (err) throw err
-    //         // res.json(result)
-    //         setTimeout(()=>{
-    //             io.to(socket.id).emit('preview',result)
-
-    //         },1000)
-    //         console.log('First 5 docs Found!')
-    //     })
-  
-    //   })
-    //   socket.on('/killQuery', (data) => {
-    //     console.log(con.threadId)
-    //     let oldConID = con.threadId
-    //     console.log(data.killQuery)
-    //     if (data.killQuery && (data.counting || data.buildingArchives == 1)){
-    //         try {
-    //             let con = mysql.createConnection({
-    //                 host: "localhost",
-    //                 user: credentials.user,
-    //                 password: credentials.pass,
-    //                 database: 'jurisprudencia_2_inst'
-    //             })
-                
-    //             con.connect()
-    //             con.query("KILL QUERY " + oldConID, function(err) {
-    //                 if (err) throw err;
-    //                 console.log("I have interrupted the executing query for a new request");
-    //                 io.to(socket.id).emit("count", null)
-
-    
-    //             });
-    //             con.end(()=>{
-    //                 console.log('New Connection ended!')
-    //             }) 
-    //         } catch (error) {
-    //             console.log('There is no query')
-            
-    //         }
-    
-    //     }
-    //     else{
-    //         console.log('There is no query')
-    
-    //     }
-  
-    //   })
-    //   socket.on('/count', (data) => {
-    //     console.log(data)
-    //     let splitedQuery = data.split(" ")
-    
-    
-    //     let sql = `SELECT count(id) FROM jurisprudencia_2_inst WHERE `
-        
-    //     splitedQuery.forEach(element => {
-    //         sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
-    //     });
-    //     sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
-        
-    //     con.query(sql, function (err, result) {
-    //         if (err) {
-    //             console.log('Query Cancelada')
-    //             io.to(socket.id).emit("count", null)
-    //         }
-    //         // res.json(result)
-    //         if (result){
-    //             io.to(socket.id).emit("count", result)
-    //             console.log(`${result[0]['count(id)']} docs found!`)
-    //         }
-    
-    
-    
-    //     })
-  
-    //   })
       socket.on('/download', (data) => {
         console.log('chegou')
         let downloadInfo = JSON.parse(data)
@@ -165,23 +78,19 @@ io.on('connection', function (socket) {
                 // console.log(row)
                 let string = JSON.stringify(row)
                 let rowJSON = JSON.parse(string)
-                // console.log(rowJSON)
+                console.log(rowJSON)
     
-                let toCsv = {
-                    data: rowJSON,
-                    fields: fields
-                };
+                
     
-                fs.stat(`./data/${filename}.csv`, function (err, stat) {
+                fs.stat(`./data/${filename}.json`, function (err, stat) {
                     if (err == null) {
                         console.log('File exists');
                         //write the actual data and end with newline
-                        
-                        var csv = rowJSON;
-                        console.log(csv)
-                        let csv = json2csv(toCsv) + newLine;
 
-                        fs.appendFile(`./data/${filename}.csv`, csv, function (err) {
+                        let csv = rowJSON + newLine;
+                        console.log(csv)
+
+                        fs.appendFile(`./data/${filename}.json`, csv, function (err) {
                             if (err) throw err;
                             console.log('The "data to append" was appended to file!');
                         });
@@ -190,7 +99,7 @@ io.on('connection', function (socket) {
                         console.log('New file, just writing headers');
                         fields = (fields + newLine);
     
-                        fs.writeFile(`./data/${filename}.csv`, fields, function (err, stat) {
+                        fs.writeFile(`./data/${filename}.json`, fields, function (err, stat) {
                             if (err) throw err;
                             console.log('file saved');
                         });
@@ -203,7 +112,7 @@ io.on('connection', function (socket) {
             .on('end', function () {
                 // all rows have been received
                 spawn = require('child_process').spawn;
-                zip = spawn('zip',['-X' , `./data/${filename}.zip`, `./data/${filename}.csv`]);
+                zip = spawn('zip',['-X' , `./data/${filename}.zip`, `./data/${filename}.json`]);
                 zip.on('exit', function(code) {
                     console.log("The file has been zipped")
                     // res.sendFile(path.join(__dirname + `/data/${req.query.text}.zip`))
