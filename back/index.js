@@ -167,20 +167,21 @@ io.on('connection', function (socket) {
                 let rowJSON = JSON.parse(string)
                 // console.log(rowJSON)
     
-                // let toCsv = {
-                //     data: rowJSON,
-                //     fields: fields
-                // };
-                let toCsv = rowJSON
-                fs.stat(`./data/${filename}.json`, function (err, stat) {
+                let toCsv = {
+                    data: rowJSON,
+                    fields: fields
+                };
+    
+                fs.stat(`./data/${filename}.csv`, function (err, stat) {
                     if (err == null) {
                         console.log('File exists');
                         //write the actual data and end with newline
-                        var csv = toCsv + newLine;
-                        console.log('penis')
+                        
+                        var csv = rowJSON;
                         console.log(csv)
+                        let csv = json2csv(toCsv) + newLine;
 
-                        fs.appendFile(`./data/${filename}.json`, csv, function (err) {
+                        fs.appendFile(`./data/${filename}.csv`, csv, function (err) {
                             if (err) throw err;
                             console.log('The "data to append" was appended to file!');
                         });
@@ -189,16 +190,9 @@ io.on('connection', function (socket) {
                         console.log('New file, just writing headers');
                         fields = (fields + newLine);
     
-                        fs.writeFile(`./data/${filename}.json`, fields, function (err, stat) {
+                        fs.writeFile(`./data/${filename}.csv`, fields, function (err, stat) {
                             if (err) throw err;
                             console.log('file saved');
-                        });
-                        //write the actual data and end with newline
-                        let csv = (toCsv) + newLine;
-    
-                        fs.appendFile(`./data/${filename}.json`, csv, function (err) {
-                            if (err) throw err;
-                            console.log('The "data to append" was appended to file!');
                         });
                     }
                 });
@@ -209,7 +203,7 @@ io.on('connection', function (socket) {
             .on('end', function () {
                 // all rows have been received
                 spawn = require('child_process').spawn;
-                zip = spawn('zip',['-X' , `./data/${filename}.zip`, `./data/${filename}.`]);
+                zip = spawn('zip',['-X' , `./data/${filename}.zip`, `./data/${filename}.csv`]);
                 zip.on('exit', function(code) {
                     console.log("The file has been zipped")
                     // res.sendFile(path.join(__dirname + `/data/${req.query.text}.zip`))
