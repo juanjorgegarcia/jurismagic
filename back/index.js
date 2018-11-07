@@ -35,104 +35,108 @@ io.on('connection', function (socket) {
     })
     
     con.connect()
-    socket.on('/q', (data) => {
-        console.log(`ClientID:${socket.id}, msg:${data}`)
+    // socket.on('/q', (data) => {
+    //     console.log(`ClientID:${socket.id}, msg:${data}`)
 
-        console.log(JSON.stringify(data))
-        splitedQuery = data.split(" ")
+    //     console.log(JSON.stringify(data))
+    //     splitedQuery = data.split(" ")
     
-        let sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
-         `
-        splitedQuery.forEach(element => {
-            sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
-        });
-        sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
+    //     let sql = `SELECT * FROM jurisprudencia_2_inst WHERE 
+    //      `
+    //     splitedQuery.forEach(element => {
+    //         sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
+    //     });
+    //     sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
         
-        con.query(sql, function (err, result) {
-            if (err) throw err
-            // res.json(result)
-            setTimeout(()=>{
-                io.to(socket.id).emit('preview',result)
+    //     con.query(sql, function (err, result) {
+    //         if (err) throw err
+    //         // res.json(result)
+    //         setTimeout(()=>{
+    //             io.to(socket.id).emit('preview',result)
 
-            },1000)
-            console.log('First 5 docs Found!')
-        })
+    //         },1000)
+    //         console.log('First 5 docs Found!')
+    //     })
   
-      })
-      socket.on('/killQuery', (data) => {
-        console.log(con.threadId)
-        let oldConID = con.threadId
-        console.log(data.killQuery)
-        if (data.killQuery && (data.counting || data.buildingArchives == 1)){
-            try {
-                let con = mysql.createConnection({
-                    host: "localhost",
-                    user: credentials.user,
-                    password: credentials.pass,
-                    database: 'jurisprudencia_2_inst'
-                })
+    //   })
+    //   socket.on('/killQuery', (data) => {
+    //     console.log(con.threadId)
+    //     let oldConID = con.threadId
+    //     console.log(data.killQuery)
+    //     if (data.killQuery && (data.counting || data.buildingArchives == 1)){
+    //         try {
+    //             let con = mysql.createConnection({
+    //                 host: "localhost",
+    //                 user: credentials.user,
+    //                 password: credentials.pass,
+    //                 database: 'jurisprudencia_2_inst'
+    //             })
                 
-                con.connect()
-                con.query("KILL QUERY " + oldConID, function(err) {
-                    if (err) throw err;
-                    console.log("I have interrupted the executing query for a new request");
-                    io.to(socket.id).emit("count", null)
+    //             con.connect()
+    //             con.query("KILL QUERY " + oldConID, function(err) {
+    //                 if (err) throw err;
+    //                 console.log("I have interrupted the executing query for a new request");
+    //                 io.to(socket.id).emit("count", null)
 
     
-                });
-                con.end(()=>{
-                    console.log('New Connection ended!')
-                }) 
-            } catch (error) {
-                console.log('There is no query')
+    //             });
+    //             con.end(()=>{
+    //                 console.log('New Connection ended!')
+    //             }) 
+    //         } catch (error) {
+    //             console.log('There is no query')
             
-            }
+    //         }
     
-        }
-        else{
-            console.log('There is no query')
+    //     }
+    //     else{
+    //         console.log('There is no query')
     
-        }
+    //     }
   
-      })
-      socket.on('/count', (data) => {
-        console.log(data)
-        let splitedQuery = data.split(" ")
+    //   })
+    //   socket.on('/count', (data) => {
+    //     console.log(data)
+    //     let splitedQuery = data.split(" ")
     
     
-        let sql = `SELECT count(id) FROM jurisprudencia_2_inst WHERE `
+    //     let sql = `SELECT count(id) FROM jurisprudencia_2_inst WHERE `
         
-        splitedQuery.forEach(element => {
-            sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
-        });
-        sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
+    //     splitedQuery.forEach(element => {
+    //         sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
+    //     });
+    //     sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
         
-        con.query(sql, function (err, result) {
-            if (err) {
-                console.log('Query Cancelada')
-                io.to(socket.id).emit("count", null)
-            }
-            // res.json(result)
-            if (result){
-                io.to(socket.id).emit("count", result)
-                console.log(`${result[0]['count(id)']} docs found!`)
-            }
+    //     con.query(sql, function (err, result) {
+    //         if (err) {
+    //             console.log('Query Cancelada')
+    //             io.to(socket.id).emit("count", null)
+    //         }
+    //         // res.json(result)
+    //         if (result){
+    //             io.to(socket.id).emit("count", result)
+    //             console.log(`${result[0]['count(id)']} docs found!`)
+    //         }
     
     
     
-        })
+    //     })
   
-      })
+    //   })
       socket.on('/download', (data) => {
-        console.log(data)
-        let sql = `SELECT * FROM jurisprudencia_2_inst WHERE `
-        let splitedQuery = data.split(" ")    
-        splitedQuery.forEach(element => {
-            sql = sql + ` texto_decisao LIKE '%${element}%' AND` 
-        });
-        sql = sql.substring(0,sql.length-3) + 'LIMIT 5'
+        console.log('chegou')
+        let downloadInfo = JSON.parse(data)
+        let docsId = downloadInfo.docsId
         
-    
+        console.log(downloadInfo)
+        let sql = `SELECT * FROM jurisprudencia_2_inst WHERE id in (`
+        let splitedQuery = downloadInfo.query.split(" ")    
+
+        docsId.forEach((id)=>{
+            sql = sql + id + ','
+        })
+        sql = sql.substring(0,sql.length-1) +')'
+        console.log(sql)
         let filename = ''
         splitedQuery.forEach(element => {
             filename = filename + element +"_"
