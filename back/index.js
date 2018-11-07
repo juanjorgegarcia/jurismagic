@@ -77,7 +77,7 @@ io.on('connection', function (socket) {
                 ];
                 // console.log(row)
                 let string = JSON.stringify(row)
-                let rowJSON = JSON.parse(string)
+    
                 console.log(rowJSON)
     
                 
@@ -87,10 +87,10 @@ io.on('connection', function (socket) {
                         console.log('File exists');
                         //write the actual data and end with newline
 
-                        let csv = rowJSON + newLine;
-                        console.log(csv)
+                        let data = string + newLine;
+                        console.log(data)
 
-                        fs.appendFile(`./data/${filename}.json`, csv, function (err) {
+                        fs.appendFile(`./data/${filename}.json`, data, function (err) {
                             if (err) throw err;
                             console.log('The "data to append" was appended to file!');
                         });
@@ -105,6 +105,7 @@ io.on('connection', function (socket) {
                         });
                     }
                 });
+                
                 // console.log(JSON.stringify(row))
                 con.resume();
     
