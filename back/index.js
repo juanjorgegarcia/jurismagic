@@ -78,32 +78,29 @@ io.on('connection', function (socket) {
                 // console.log(row)
                 let string = JSON.stringify(row)
     
-                console.log(rowJSON)
     
-                
-    
+                //write the headers and newline
+                console.log('New file, just writing headers');
+                fields = (fields + newLine);
+
+                fs.writeFile(`./data/${filename}.json`, fields.toString(), function (err, stat) {
+                    if (err) throw err;
+                    console.log('file saved');
+                });
+
                 fs.stat(`./data/${filename}.json`, function (err, stat) {
                     if (err == null) {
                         console.log('File exists');
                         //write the actual data and end with newline
 
                         let data = string + newLine;
-                        console.log(data)
+                        console.log(data.toString())
 
-                        fs.appendFile(`./data/${filename}.json`, data, function (err) {
+                        fs.appendFile(`./data/${filename}.json`, data.toString(), function (err) {
                             if (err) throw err;
                             console.log('The "data to append" was appended to file!');
                         });
-                    } else {
-                        //write the headers and newline
-                        console.log('New file, just writing headers');
-                        fields = (fields + newLine);
-    
-                        fs.writeFile(`./data/${filename}.json`, fields, function (err, stat) {
-                            if (err) throw err;
-                            console.log('file saved');
-                        });
-                    }
+                    } 
                 });
                 
                 // console.log(JSON.stringify(row))
