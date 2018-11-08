@@ -1,3 +1,4 @@
+// @ts-check
 let express = require('express')
 let app = express()
 let mysql = require('mysql')
@@ -57,6 +58,11 @@ io.on('connection', function (socket) {
         filename = filename.substring(0,filename.length-1)
         console.log(filename)
         let query = con.query(sql)
+        var logger = fs.createWriteStream(`./data/${filename}.json`, {
+            flags: 'a' // 'a' means appending (old data will be preserved)
+          })
+          
+ 
         query.on('error', function (err) {
                 // Handle error, an 'end' event will be emitted after this as well
             })
@@ -77,32 +83,33 @@ io.on('connection', function (socket) {
                 ];
                 // console.log(row)
                 let string = JSON.stringify(row)
+
+                // fs.stat(`./data/${filename}.json`, function (err, stat) {
+                //     if (err == null) {
+                //         console.log('File exists');
+                //         //write the actual data and end with newline
+
+                //         console.log(data.toString())
+
+                //         fs.appendFile(`./data/${filename}.json`, data, function (err) {
+                //             if (err) throw err;
+                //             console.log('The "data to append" was appended to file!');
+                //         });
+                //     } else {
+                //         //write the headers and newline
+                //         console.log('New file, just writing headers');
+                //         fields = (fields + newLine);
     
-    
-                //write the headers and newline
-                console.log('New file, just writing headers');
-                fields = (fields + newLine);
+                //         fs.writeFile(`./data/${filename}.json`, fields, function (err, stat) {
+                //             if (err) throw err;
+                //             console.log('file saved');
+                //         });
+                //     }
+                // });
+                let data = string + newLine;
 
-                fs.writeFile(`./data/${filename}.json`, fields.toString(), function (err, stat) {
-                    if (err) throw err;
-                    console.log('file saved');
-                });
-
-                fs.stat(`./data/${filename}.json`, function (err, stat) {
-                    if (err == null) {
-                        console.log('File exists');
-                        //write the actual data and end with newline
-
-                        let data = string + newLine;
-                        console.log(data.toString())
-
-                        fs.appendFile(`./data/${filename}.json`, data.toString(), function (err) {
-                            if (err) throw err;
-                            console.log('The "data to append" was appended to file!');
-                        });
-                    } 
-                });
-                
+                logger.write(data) // append string to your file
+                 // again
                 // console.log(JSON.stringify(row))
                 con.resume();
     
