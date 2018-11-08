@@ -58,6 +58,7 @@ io.on('connection', function (socket) {
         filename = filename.substring(0,filename.length-1)
         console.log(filename)
         let query = con.query(sql)
+
         var logger = fs.createWriteStream(`./data/${filename}.json`, {
             flags: 'a' // 'a' means appending (old data will be preserved)
           })
@@ -77,10 +78,10 @@ io.on('connection', function (socket) {
     
                 let newLine = "\r\n";
     
-                let fields = ['id', 'tribunal', "numero", "assunto", "classe", "data_decisao",
-                    "orgao_julgador", "julgador", "texto_decisao", "relatorio", "fundamentacao", "dispositivo",
-                    "polo_ativo", "polo_passivo", "origem", "classificacao", "classificacao_auto"
-                ];
+                // let fields = ['id', 'tribunal', "numero", "assunto", "classe", "data_decisao",
+                //     "orgao_julgador", "julgador", "texto_decisao", "relatorio", "fundamentacao", "dispositivo",
+                //     "polo_ativo", "polo_passivo", "origem", "classificacao", "classificacao_auto"
+                // ];
                 // console.log(row)
                 let string = JSON.stringify(row)
 
@@ -116,6 +117,8 @@ io.on('connection', function (socket) {
             })
             .on('end', function () {
                 // all rows have been received
+                logger.end() // close string
+
                 spawn = require('child_process').spawn;
                 zip = spawn('zip',['-X' , `./data/${filename}.zip`, `./data/${filename}.json`]);
                 zip.on('exit', function(code) {
