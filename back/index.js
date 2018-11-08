@@ -1,4 +1,4 @@
-// @ts-check
+
 let express = require('express')
 let app = express()
 let mysql = require('mysql')
@@ -109,10 +109,12 @@ io.on('connection', function (socket) {
                 // });
                 let data = string + newLine;
 
-                logger.write(data) // append string to your file
+                logger.write(data,()=>{
+                    con.resume();
+
+                }) // append string to your file
                  // again
                 // console.log(JSON.stringify(row))
-                con.resume();
     
             })
             .on('end', function () {
